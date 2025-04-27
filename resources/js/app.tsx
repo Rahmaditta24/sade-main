@@ -1,24 +1,32 @@
-import '../css/app.css';
+import "../css/app.css";
+import { createRoot } from "react-dom/client";
+import { createInertiaApp } from "@inertiajs/react";
+import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
+import { Toaster } from "react-hot-toast";
+import { initializeTheme } from "./hooks/use-appearance";
 
-import { createInertiaApp } from '@inertiajs/react';
-import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import { createRoot } from 'react-dom/client';
-import { initializeTheme } from './hooks/use-appearance';
-
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || "Laravel";
 
 createInertiaApp({
-    title: (title) => `${title} - ${appName}`,
-    resolve: (name) => resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx')),
-    setup({ el, App, props }) {
-        const root = createRoot(el);
+  title: (title) => `${title} - ${appName}`,
+  resolve: (name) =>
+    resolvePageComponent(
+      `./Pages/${name}.tsx`,
+      import.meta.glob("./Pages/**/*.tsx")
+    ),
+  setup({ el, App, props }) {
+    initializeTheme(); // Dark/light mode
 
-        root.render(<App {...props} />);
-    },
-    progress: {
-        color: '#4B5563',
-    },
+    const root = createRoot(el);
+
+    root.render(
+      <>
+        <App {...props} />
+        <Toaster position="top-right" reverseOrder={false} />
+      </>
+    );
+  },
+  progress: {
+    color: "#4B5563",
+  },
 });
-
-// This will set light / dark mode on load...
-initializeTheme();

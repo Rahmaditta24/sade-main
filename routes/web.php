@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\KegiatanController;
+use App\Http\Controllers\KeuanganController;
+use App\Http\Controllers\PenghuniController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,39 +16,43 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('home');
 
-    Route::get('/keuangan', function () {
-        return Inertia::render('keuangan', [
-            'title' => 'Keuangan',
-            'description' => 'Kelola keuangan Anda dengan mudah dan efisien.',
-        ]);
-    })->name('keuangan');
+     // Route untuk keuangan
+     Route::middleware('auth')->group(function () {
+     Route::get('/keuangan', [KeuanganController::class, 'index'])->name('keuangan.index');
+     Route::post('/keuangan', [KeuanganController::class, 'store'])->name('keuangan.store');
+     Route::put('/keuangan/{keuangan}', [KeuanganController::class, 'update'])->name('keuangan.update');
+     Route::delete('/keuangan/{keuangan}', [KeuanganController::class, 'destroy'])->name('keuangan.destroy');
+    });
+ 
+     // Route untuk kegiatan
+     Route::prefix('kegiatan')->name('kegiatan.')->group(function () {
+     Route::get('/', [KegiatanController::class, 'index'])->name('index');      // Tampilkan semua kegiatan
+     Route::post('/', [KegiatanController::class, 'store'])->name('store');      // Simpan kegiatan baru
+     Route::put('/{kegiatan}', [KegiatanController::class, 'update'])->name('update');  // Update kegiatan
+     Route::delete('/{kegiatan}', [KegiatanController::class, 'destroy'])->name('destroy'); // Hapus kegiatan
+});
 
-    Route::get('/kegiatan', function () {
-        return Inertia::render('kegiatan', [
-            'title' => 'Kegiatan',
-            'description' => 'Ikuti berbagai kegiatan menarik yang kami adakan.',
-        ]);
-    })->name('kegiatan');
-
-    Route::get('/penghuni', function () {
-        return Inertia::render('penghuni', [
-            'title' => 'Penghuni',
-            'description' => 'Kelola data penghuni dengan mudah.',
-        ]);
-    })->name('penghuni');
+ 
+     // Route untuk penghuni
+     Route::prefix('penghuni')->name('penghuni.')->group(function () {
+     Route::get('/', [PenghuniController::class, 'index'])->name('index');
+     Route::post('/', [PenghuniController::class, 'store'])->name('store');
+     Route::put('/{id}', [PenghuniController::class, 'update'])->name('update');
+     Route::delete('/{id}', [PenghuniController::class, 'destroy'])->name('destroy');
+    });
 });
 
 Route::middleware('guest')->group(function () {
-    // Rute default /login mengarah ke form login Admin
+    // Route default /login mengarah ke form login Admin
     Route::get('/login', [AuthController::class, 'showAdminLoginForm'])->name('login');
 
-    // Rute login khusus Admin
+    // Route login khusus Admin
     Route::get('/login/admin', [AuthController::class, 'showAdminLoginForm'])->name('login.admin');
     Route::post('/login/admin', [AuthController::class, 'loginAdmin'])->name('login.admin.submit');
 
-    // Rute login khusus Penghuni
+    // Route login khusus Penghuni
     Route::get('/login/penghuni', [AuthController::class, 'showPenghuniLoginForm'])->name('login.penghuni');
     Route::post('/login/penghuni', [AuthController::class, 'loginPenghuni'])->name('login.penghuni.submit');
 });
-// Rute logout
+// Route logout
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
